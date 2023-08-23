@@ -54,8 +54,8 @@ def video_input(data_src):
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         if custom_size:
-            width = st.sidebar.number_input("Width", min_value=120, step=20, value=width)
-            height = st.sidebar.number_input("Height", min_value=120, step=20, value=height)
+            width = st.sidebar.number_input("Width", min_value=120, step=20, value=width, key="width")
+            height = st.sidebar.number_input("Height", min_value=120, step=20, value=height, key="height")
 
         fps = 0
         st1, st2, st3 = st.columns(3)
@@ -133,6 +133,8 @@ def get_user_model():
     return model_file
 
 def main():
+    
+    st.write(st.session_state)
     # global variables
     global model, confidence, cfg_model_path
 
