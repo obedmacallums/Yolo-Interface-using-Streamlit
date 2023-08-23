@@ -6,6 +6,7 @@ import torch
 import cv2
 import os
 import time
+from ultralytics import YOLO 
 
 st.set_page_config(layout="wide")
 
@@ -92,22 +93,22 @@ def video_input(data_src):
 
 
 def infer_image(img, size=None):
-    model.conf = confidence
-    result = model(img, size=size) if size else model(img)
-    result.render()
-    image = Image.fromarray(result.ims[0])
-    return image
+    # model.conf = confidence
+    results = model.predict(img, imgsz=size, device='mps', conf=confidence) if size else model.predict(img, device='mps', conf=confidence)
+    annotated_frame = results[0].plot()
+    return annotated_frame
 
 
-@st.experimental_singleton
+@st.cache_resource
 def load_model(path, device):
-    model_ = torch.hub.load('ultralytics/yolov5', 'custom', path=path, force_reload=True)
-    model_.to(device)
-    print("model to ", device)
+    # model_ = torch.hub.load('ultralytics/yolov5', 'custom', path=path, force_reload=True)
+    # model_.to(device)
+    # print("model to ", device)
+    model_  = YOLO(path)
     return model_
 
 
-@st.experimental_singleton
+@st.cache_resource
 def download_model(url):
     model_file = wget.download(url, out="models")
     return model_file
@@ -161,7 +162,7 @@ def main():
             device_option = st.sidebar.radio("Select Device", ['cpu', 'cuda'], disabled=True, index=0)
 
         # load model
-        model = load_model(cfg_model_path, device_option)
+        model = load_model(cfg_model_path, 'cpu')
 
         # confidence slider
         confidence = st.sidebar.slider('Confidence', min_value=0.1, max_value=1.0, value=.45)
